@@ -1,12 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
-using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace ThaiIMEBasic
@@ -139,7 +135,7 @@ namespace ThaiIMEBasic
         }
 
         void updateFoundCounter() {
-            var secondsStr = $"{stopwatch.Elapsed.TotalSeconds:#.##}";
+            var secondsStr = decimal.Round((decimal) stopwatch.Elapsed.TotalSeconds, 2, MidpointRounding.AwayFromZero); // $"{stopwatch.Elapsed.TotalSeconds:#.##}";
             lblFoundCount.Text = $"Found {resultList.Count} item(s) in {secondsStr} s";
         }
 
@@ -198,6 +194,7 @@ namespace ThaiIMEBasic
             if (resultList.Count > 0)
                 lbCandidates.SelectedIndex = 0;
 
+            stopwatch.Stop();
             updateFoundCounter();
         }
 

@@ -15,7 +15,7 @@ namespace ThaiIMEBasic
     class Manager
     {
         private static Dictionary<string, string> transcriptionDict;
-        private static List<Tuple<string, List<string>>> wordList;
+        private static List<(string, List<string>)> wordList;
 
         // must be called once during lifetime
         public static void init() {
@@ -94,7 +94,7 @@ namespace ThaiIMEBasic
 
                 { " ", " " }
             };
-            wordList = new List<Tuple<string, List<string>>>();
+            wordList = new List<(string, List<string>)>();
 
             loadDict();
         }
@@ -123,7 +123,9 @@ namespace ThaiIMEBasic
 
                     var result = wordList.Where(pair => pair.Item1 == transcription);
                     if (result.Count() == 0)
-                        wordList.Add(new Tuple<string, List<string>>(transcription, new List<string>() { word }));
+                        wordList.Add((
+                            transcription,
+                            new List<string>() { word }));
                     else
                         result.First().Item2.Add(word);
                 }

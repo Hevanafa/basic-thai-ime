@@ -40,7 +40,7 @@ namespace ThaiIMEBasic
             // 
             this.txbInput.Location = new System.Drawing.Point(18, 18);
             this.txbInput.Margin = new System.Windows.Forms.Padding(4);
-            this.txbInput.MaxLength = 5;
+            this.txbInput.MaxLength = 100;
             this.txbInput.Name = "txbInput";
             this.txbInput.Size = new System.Drawing.Size(232, 27);
             this.txbInput.TabIndex = 0;
