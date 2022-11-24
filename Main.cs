@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -13,7 +14,9 @@ namespace ThaiIMEBasic
     public partial class Main : Form
     {
         Dictionary<string, string> dict, advancedDict;
-        string result;
+        //string result;
+        List<string> resultList = new List<string>();
+        Stopwatch stopwatch = new Stopwatch();
 
         public Main()
         {
@@ -21,11 +24,11 @@ namespace ThaiIMEBasic
 
             dict = new Dictionary<string, string>() {
                 { "b", "บ" },
-                { "c", "จ " },
+                { "c", "จ" },
                 { "ch", "ฉชฌ" },
                 { "d", "ฎด" },
                 { "f", "ฝฟ" },
-                { "k", "ก " },
+                { "k", "ก" },
                 { "kh", "ขฃคฅฆ"},
                 { "h", "หฮ"},
                 { "l", "ลฦฬ"},
@@ -34,7 +37,7 @@ namespace ThaiIMEBasic
                 { "ng", "ง" },
                 { "ny", "ญญ"},
                 { "o", "อโ" },
-                { "p", "ป " },
+                { "p", "ป" },
                 { "ph", "ผพภ"},
                 { "r", "รฤ"},
                 //{ "rr", "รร" },
@@ -66,7 +69,6 @@ namespace ThaiIMEBasic
                 { "8", "\u0e47" },
                 { "9", "\u0e4c" },
             };
-
             advancedDict = new Dictionary<string, string>() {
                 { "b", "บพ" },
                 { "bh", "ภ" },
@@ -124,42 +126,79 @@ namespace ThaiIMEBasic
                 { "8", "\u0e47" },
                 { "9", "\u0e4c" },
             };
+
+            Manager.init();
         }
 
-        string trimmedResult {
-            get { return result?.Trim(); }
-        }
+        //string trimmedResult {
+        //    get { return result?.Trim(); }
+        //}
 
         bool isAdvanced {
             get { return cbAdvanced?.Checked ?? false; }
         }
 
+        void updateFoundCounter() {
+            var secondsStr = $"{stopwatch.Elapsed.TotalSeconds:#.##}";
+            lblFoundCount.Text = $"Found {resultList.Count} item(s) in {secondsStr} s";
+        }
+
         void updateList() {
+            stopwatch.Restart();
+
             lbCandidates.Items.Clear();
             lbCandidates.SelectedIndex = -1;
-            var search = txbInput.Text.ToLower();
+            resultList.Clear();
+
+            var term = txbInput.Text.ToLower();
+
+            if (term.Length == 0)
+            {
+                stopwatch.Stop();
+                updateFoundCounter();
+                return;
+            }
 
             var d = isAdvanced ? advancedDict : dict;
-            result = d.ContainsKey(search)
-                ? d[search] : null;
+            //result = d.ContainsKey(term)
+            //    ? d[term] : null;
 
-            if (result != null)
-            {
-                if (result.Length == 1) {
-                    appendOutput(result[0]);
-                    clearInput();
-                    return;
-                }
+            if (d.ContainsKey(term))
+                resultList.AddRange(d[term].Select(x => "" + x));
 
-                char c;
-                for (var a = 0; a < trimmedResult.Length; a++)
-                {
-                    c = result[a];
-                    lbCandidates.Items.Add($"{a + 1} - { c }");
-                }
+            //if (result != null)
+            //{
+            //    if (result.Length == 1) {
+            //        appendOutput(result[0]);
+            //        clearInput();
+            //        return;
+            //    }
 
+            //    char c;
+            //    for (var a = 0; a < trimmedResult.Length; a++)
+            //    {
+            //        c = result[a];
+            //        lbCandidates.Items.Add($"{a + 1} - { c }");
+            //    }
+
+            //    lbCandidates.SelectedIndex = 0;
+            //}
+
+            // add results from the word list
+            var result = Manager.search(term);
+            //Debug.WriteLine("Found " + result.Length);
+            resultList.AddRange(result);
+
+            lbCandidates.Items.AddRange(
+                resultList.Select((word, idx) =>
+                    (idx < 9 ? idx + 1 + " - " : "") + word
+                ).ToArray()
+            );
+
+            if (resultList.Count > 0)
                 lbCandidates.SelectedIndex = 0;
-            }
+
+            updateFoundCounter();
         }
 
         bool skipNext = false;
@@ -187,13 +226,24 @@ namespace ThaiIMEBasic
             txbOutput.Text += c;
         }
 
+        void appendOutput(string s) {
+            txbOutput.Text += s;
+        }
+
         void insertOutput(char c) {
             txbOutput.Text = txbOutput.Text.Insert(txbOutput.SelectionStart, $"{ c }");
             txbOutput.SelectionStart++;
         }
 
+        private void Main_Load(object sender, EventArgs e)
+        {
+
+        }
+
         private void txbInput_KeyDown(object sender, KeyEventArgs e)
         {
+            int idx;
+
             switch (e.KeyCode) {
                 case Keys.Space:
                     e.Handled = true;
@@ -201,10 +251,10 @@ namespace ThaiIMEBasic
                     break;
                 case Keys.Enter:
                     // transfer input
-                    var idx = lbCandidates.SelectedIndex;
+                    idx = lbCandidates.SelectedIndex;
                     if (idx >= 0)
                     {
-                        appendOutput(result[idx]);
+                        appendOutput(resultList[idx]);
                         clearInput();
                     }
 
@@ -214,16 +264,22 @@ namespace ThaiIMEBasic
                     break;
 
                 case Keys.Up:
-                    lbCandidates.SelectedIndex--;
+                    if (lbCandidates.SelectedIndex > 0)
+                        lbCandidates.SelectedIndex--;
                     break;
                 case Keys.Down:
-                    lbCandidates.SelectedIndex++;
+                    if (lbCandidates.SelectedIndex < lbCandidates.Items.Count - 1)
+                        lbCandidates.SelectedIndex++;
                     break;
 
-                case Keys k when k >= Keys.D0 && k <= Keys.D9:
-                    if (result?.Length > 0 && char.IsLetter(txbInput.Text[0]))
+                case Keys k when k >= Keys.D1 && k <= Keys.D9:
+                    //if (result?.Length > 0 && char.IsLetter(txbInput.Text[0]))
+                    idx = k - Keys.D1;
+
+                    if (idx < resultList.Count)
                     {
-                        appendOutput(result[k - Keys.D1]);
+                        //appendOutput(result[k - Keys.D1]);
+                        appendOutput(resultList[idx]);
                         clearInput();
                         skipNext = true;
                     }
