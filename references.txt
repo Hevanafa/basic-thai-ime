@@ -1,0 +1,13 @@
+24-11-2022
+
+Word list:
+https://github.com/nv23/thai-wordlist
+Contains around 19000 words
+
+Thai Script unicode map
+https://en.wikipedia.org/wiki/Thai_script#Unicode
+
+Frequency list
+https://www.expatden.com/thai/thai-frequency-lists-with-english-definitions/
+
+I took this one: Chula university top 5000 Thai words

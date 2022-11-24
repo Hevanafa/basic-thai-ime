@@ -14,8 +14,12 @@ namespace ThaiIMEBasic
 {
     class Manager
     {
+        const string
+            wordlistFilename = "thai_wordlist.txt",
+            frequencyFilename = "frequency_list.txt";
         private static Dictionary<string, string> transcriptionDict;
         private static List<(string, List<string>)> wordList;
+        private static Dictionary<string, int> frequencyDict;
 
         // must be called once during lifetime
         public static void init() {
@@ -94,9 +98,8 @@ namespace ThaiIMEBasic
 
                 { " ", " " }
             };
-            wordList = new List<(string, List<string>)>();
-
-            loadDict();
+            loadWordList();
+            loadFrequencyDict();
         }
 
         public static string getTranscription(string thai) =>
@@ -105,15 +108,17 @@ namespace ThaiIMEBasic
                     .Where(c => transcriptionDict.ContainsKey("" + c))
                     .Select(c => transcriptionDict["" + c]));
 
-        public async static void loadDict()
+        public async static void loadWordList()
         {
-            Debug.WriteLine("load dictionary");
+            Debug.WriteLine("load word list");
+
+            wordList = new List<(string, List<string>)>();
 
             StreamReader sr = null;
 
             try
             {
-                sr = new StreamReader("thai-wordlist.txt");
+                sr = new StreamReader(wordlistFilename);
                 string word, transcription;
 
                 while (!sr.EndOfStream)
@@ -141,6 +146,36 @@ namespace ThaiIMEBasic
             }
         }
 
+        public async static void loadFrequencyDict() {
+            Debug.WriteLine("load frequency dict");
+
+            frequencyDict = new Dictionary<string, int>();
+            StreamReader sr = null;
+
+            try
+            {
+                sr = new StreamReader(frequencyFilename);
+
+                string line;
+                string[] temp;
+
+                // Todo: read the dictionary
+                while (!sr.EndOfStream) {
+                    line = await sr.ReadLineAsync();
+                    temp = line.Split('\t');
+                    frequencyDict.Add(temp[0], Convert.ToInt32(temp[1]));
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.Print(ex.Message);
+            }
+            finally {
+                if (sr != null)
+                    sr.Close();
+            }
+        }
+
         public static string[] search(string term) {
             var exact = wordList.Where(pair => pair.Item1 == term).SelectMany(pair => pair.Item2).ToArray();
 
@@ -149,7 +184,14 @@ namespace ThaiIMEBasic
                 .SelectMany(pair => pair.Item2)
                 .ToArray();
 
-            return exact.Concat(startsWith).Distinct().ToArray();
+            return exact.Concat(startsWith)
+                .OrderByDescending(word => getFrequency(word))
+                .Distinct()
+                .ToArray();
         }
+
+        public static int getFrequency(string thaiWord) =>
+            frequencyDict.ContainsKey(thaiWord) ?
+                frequencyDict[thaiWord] : 0;
     }
 }

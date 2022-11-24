@@ -1,0 +1,20 @@
+Basic Thai IME
+by Hevanafa (24-11-2022)
+
+How it works:
+transcribe the word list while skipping all the diacritics,
+then the user can search by how it's spelled
+
+Examples:
+Format:
+[word]
+[search term] instead of [how it's pronounced]
+
+เขมร
+"ekhmr" instead of "khamen"
+
+ไวยากรณ์
+"aiwyakrn" instead of "waiyakon"
+
+วัฒนธรรม
+"wthnthrrm" instead of "watthanatham"
