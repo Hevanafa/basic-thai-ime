@@ -6,9 +6,7 @@ using System.Data;
 using System.Diagnostics;
 
 // Basic Thai IME word list reader & browser
-
-// Thai word list from:
-// https://github.com/nv23/thai-wordlist
+// By Hevanafa (24-11-2022)
 
 namespace ThaiIMEBasic
 {
@@ -17,12 +15,123 @@ namespace ThaiIMEBasic
         const string
             wordlistFilename = "thai_wordlist.txt",
             frequencyFilename = "frequency_list.txt";
-        private static Dictionary<string, string> transcriptionDict;
-        private static List<(string, List<string>)> wordList;
-        private static Dictionary<string, int> frequencyDict;
+
+
+        private readonly static Dictionary<string, string>
+            singlesDict,
+            advancedSinglesDict,
+            transcriptionDict,
+            advancedTranscriptionDict;
+        private readonly static List<(string, List<string>)> wordlist = new List<(string, List<string>)>(); // same as Tuple<string, List<string>>
+        private readonly static Dictionary<string, int> frequencyDict = new Dictionary<string, int>();
 
         // must be called once during lifetime
-        public static void init() {
+        static Manager() { 
+            singlesDict = new Dictionary<string, string>() {
+                { "b", "บ" },
+                { "c", "จ" },
+                { "ch", "ฉชฌ" },
+                { "d", "ฎด" },
+                { "f", "ฝฟ" },
+                { "k", "ก" },
+                { "kh", "ขฃคฅฆ"},
+                { "h", "หฮ"},
+                { "l", "ลฦฬ"},
+                { "m", "ม"},
+                { "n", "ณน" },
+                { "ng", "ง" },
+                { "ny", "ญญ"},
+                { "o", "อโ" },
+                { "p", "ป" },
+                { "ph", "ผพภ"},
+                { "r", "รฤ"},
+                //{ "rr", "รร" },
+                { "s", "ซศษส" },
+                { "t", "ฏต" },
+                { "th", "ฐฑฒถทธ"},
+                { "w", "ว"},
+                { "y", "ญย"},
+
+                // special case
+                { "q", "ๆ" },
+                { "-", "\u0e47" },
+
+                // vowels
+                { "a", "ะ\u0e31า" },
+                { "ae", "แ" },
+                { "am", "ำ" },
+                { "ai", "ใไ" },
+                { "e", "เ" },
+                { "i", "\u0e34\u0e35"},
+                { "ue", "\u0e36\u0e37ๅ"},
+                { "u", "\u0e38\u0e39"},
+
+                // tone marks
+                { "1", "\u0e48" },
+                { "2", "\u0e49" },
+                { "3", "\u0e4a" },
+                { "4", "\u0e4b" },
+                { "8", "\u0e47" },
+                { "9", "\u0e4c" },
+            };
+            advancedSinglesDict = new Dictionary<string, string>() {
+                { "b", "บพ" },
+                { "bh", "ภ" },
+                { "c", "จ " },
+                { "ch", "ฉ" },
+                { "d", "ฎฑดท" },
+                { "dh", "ฒธ" },
+                { "f", "ฟ" },
+                { "g", "ค " },
+                { "gg", "ฅ"}, // obsolete
+                { "gh", "ฆ" },
+                { "k", "ก " },
+                { "kh", "ข"},
+                { "h", "หฮ"},
+                { "l", "ลฦฬ"},
+                { "j", "ช "},
+                { "jh", "ฌ"},
+                { "m", "ม"},
+                { "n", "ณน" },
+                { "ng", "ง" },
+                { "ny", "ญ"},
+                { "o", "อโ" },
+                { "p", "ป " },
+                { "ph", "ผ"},
+                { "r", "รฤ"},
+                //{ "rr", "รร" },
+                { "s", "ศษส" },
+                { "t", "ฏต" },
+                { "th", "ฐถ"},
+                { "v", "ฝ" },
+                { "w", "ว"},
+                { "x", "ฃ"}, // obsolete
+                { "y", "ย"},
+                { "z", "ซ"},
+
+                // special case
+                { "q", "ๆ" },
+                { "-", "\u0e47" }, // mai-taikhu
+
+                // vowels
+                { "a", "ะ\u0e31า" },
+                { "ae", "แ" },
+                { "am", "ำ" },
+                { "ai", "ใไ" },
+                { "e", "เ" },
+                { "i", "\u0e34\u0e35"},
+                { "ue", "\u0e36\u0e37ๅ"},
+                { "u", "\u0e38\u0e39"},
+
+                // tone marks
+                { "1", "\u0e48" },
+                { "2", "\u0e49" },
+                { "3", "\u0e4a" },
+                { "4", "\u0e4b" },
+                { "8", "\u0e47" },
+                { "9", "\u0e4c" },
+            };
+
             transcriptionDict = new Dictionary<string, string>() {
                 { "ก", "k" },
                 { "ข", "kh" },
@@ -112,8 +221,6 @@ namespace ThaiIMEBasic
         {
             Debug.WriteLine("load word list");
 
-            wordList = new List<(string, List<string>)>();
-
             StreamReader sr = null;
 
             try
@@ -126,9 +233,9 @@ namespace ThaiIMEBasic
                     word = await sr.ReadLineAsync();
                     transcription = getTranscription(word);
 
-                    var result = wordList.Where(pair => pair.Item1 == transcription);
+                    var result = wordlist.Where(pair => pair.Item1 == transcription);
                     if (result.Count() == 0)
-                        wordList.Add((
+                        wordlist.Add((
                             transcription,
                             new List<string>() { word }));
                     else
@@ -149,7 +256,6 @@ namespace ThaiIMEBasic
         public async static void loadFrequencyDict() {
             Debug.WriteLine("load frequency dict");
 
-            frequencyDict = new Dictionary<string, int>();
             StreamReader sr = null;
 
             try
@@ -159,7 +265,6 @@ namespace ThaiIMEBasic
                 string line;
                 string[] temp;
 
-                // Todo: read the dictionary
                 while (!sr.EndOfStream) {
                     line = await sr.ReadLineAsync();
                     temp = line.Split('\t');
@@ -176,18 +281,30 @@ namespace ThaiIMEBasic
             }
         }
 
-        public static string[] search(string term) {
-            var exact = wordList.Where(pair => pair.Item1 == term).SelectMany(pair => pair.Item2).ToArray();
+        public static string[] filterWordList(string term, int limit = 0) {
+            // filter singles dictionary
+            //var d = isAdvanced ? Manager.adv : dict;
 
-            // flatten list of lists
-            var startsWith = wordList.Where(pair => pair.Item1.StartsWith(term)) // pair.Item1.Contains(term)
-                .SelectMany(pair => pair.Item2)
-                .ToArray();
+            var singles = singlesDict.ContainsKey(term)
+                ? singlesDict[term].Select(x => "" + x)
+                : Enumerable.Empty<string>();
 
-            return exact.Concat(startsWith)
-                .OrderByDescending(word => getFrequency(word))
-                .Distinct()
-                .ToArray();
+            // exact matches
+            var exact = wordlist.Where(pair => pair.Item1 == term)
+                .SelectMany(pair => pair.Item2);
+
+            // match only the start, flatten list of lists
+            var startsWith = wordlist.Where(pair => pair.Item1.StartsWith(term)) // pair.Item1.Contains(term)
+                .SelectMany(pair => pair.Item2);
+
+            // concat.sort.uniq
+            // show singular characters first, then words
+            var ie = singles
+                .Concat(exact.Concat(startsWith)
+                    .OrderByDescending(word => getFrequency(word))
+                ).Distinct();
+
+            return (limit > 0 ? ie.Take(limit) : ie).ToArray();
         }
 
         public static int getFrequency(string thaiWord) =>

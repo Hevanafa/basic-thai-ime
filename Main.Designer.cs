@@ -34,6 +34,8 @@ namespace ThaiIMEBasic
             this.txbOutput = new System.Windows.Forms.TextBox();
             this.cbAdvanced = new System.Windows.Forms.CheckBox();
             this.lblFoundCount = new System.Windows.Forms.Label();
+            this.cbFrequency = new System.Windows.Forms.CheckBox();
+            this.cbLimit = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // txbInput
@@ -46,7 +48,6 @@ namespace ThaiIMEBasic
             this.txbInput.TabIndex = 0;
             this.txbInput.TextChanged += new System.EventHandler(this.txbInput_TextChanged);
             this.txbInput.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txbInput_KeyDown);
-            this.txbInput.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txbInput_KeyPress);
             // 
             // lbCandidates
             // 
@@ -58,6 +59,8 @@ namespace ThaiIMEBasic
             this.lbCandidates.Name = "lbCandidates";
             this.lbCandidates.Size = new System.Drawing.Size(232, 257);
             this.lbCandidates.TabIndex = 2;
+            this.lbCandidates.DoubleClick += new System.EventHandler(this.lbCandidates_DoubleClick);
+            this.lbCandidates.KeyDown += new System.Windows.Forms.KeyEventHandler(this.lbCandidates_KeyDown);
             // 
             // txbOutput
             // 
@@ -71,6 +74,7 @@ namespace ThaiIMEBasic
             // cbAdvanced
             // 
             this.cbAdvanced.AutoSize = true;
+            this.cbAdvanced.Enabled = false;
             this.cbAdvanced.Location = new System.Drawing.Point(18, 345);
             this.cbAdvanced.Name = "cbAdvanced";
             this.cbAdvanced.Size = new System.Drawing.Size(403, 23);
@@ -87,11 +91,35 @@ namespace ThaiIMEBasic
             this.lblFoundCount.TabIndex = 4;
             this.lblFoundCount.Text = "Found N words in T seconds";
             // 
+            // cbFrequency
+            // 
+            this.cbFrequency.AutoSize = true;
+            this.cbFrequency.Location = new System.Drawing.Point(18, 374);
+            this.cbFrequency.Name = "cbFrequency";
+            this.cbFrequency.Size = new System.Drawing.Size(182, 23);
+            this.cbFrequency.TabIndex = 5;
+            this.cbFrequency.Text = "Show word frequency";
+            this.cbFrequency.UseVisualStyleBackColor = true;
+            // 
+            // cbLimit
+            // 
+            this.cbLimit.AutoSize = true;
+            this.cbLimit.Checked = true;
+            this.cbLimit.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.cbLimit.Location = new System.Drawing.Point(261, 374);
+            this.cbLimit.Name = "cbLimit";
+            this.cbLimit.Size = new System.Drawing.Size(169, 23);
+            this.cbLimit.TabIndex = 6;
+            this.cbLimit.Text = "Limit List Size (100)";
+            this.cbLimit.UseVisualStyleBackColor = true;
+            // 
             // Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 19F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(532, 380);
+            this.ClientSize = new System.Drawing.Size(532, 410);
+            this.Controls.Add(this.cbLimit);
+            this.Controls.Add(this.cbFrequency);
             this.Controls.Add(this.lblFoundCount);
             this.Controls.Add(this.cbAdvanced);
             this.Controls.Add(this.txbOutput);
@@ -115,6 +143,8 @@ namespace ThaiIMEBasic
         private System.Windows.Forms.TextBox txbOutput;
         private System.Windows.Forms.CheckBox cbAdvanced;
         private System.Windows.Forms.Label lblFoundCount;
+        private System.Windows.Forms.CheckBox cbFrequency;
+        private System.Windows.Forms.CheckBox cbLimit;
     }
 }
 
