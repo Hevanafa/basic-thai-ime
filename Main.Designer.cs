@@ -68,6 +68,7 @@ namespace ThaiIMEBasic
             this.txbOutput.Margin = new System.Windows.Forms.Padding(4);
             this.txbOutput.Multiline = true;
             this.txbOutput.Name = "txbOutput";
+            this.txbOutput.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.txbOutput.Size = new System.Drawing.Size(258, 295);
             this.txbOutput.TabIndex = 1;
             // 
@@ -81,6 +82,7 @@ namespace ThaiIMEBasic
             this.cbAdvanced.TabIndex = 3;
             this.cbAdvanced.Text = "&Advanced Orthography (Pali && Sanskrit orthography)";
             this.cbAdvanced.UseVisualStyleBackColor = true;
+            this.cbAdvanced.Visible = false;
             // 
             // lblFoundCount
             // 
@@ -128,6 +130,7 @@ namespace ThaiIMEBasic
             this.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Margin = new System.Windows.Forms.Padding(4);
+            this.MaximizeBox = false;
             this.Name = "Main";
             this.Text = "Basic Thai IME - By Hevanafa (23-11-2022)";
             this.Load += new System.EventHandler(this.Main_Load);

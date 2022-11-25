@@ -102,6 +102,10 @@ namespace ThaiIMEBasic
             txbOutput.SelectionStart++;
         }
 
+        void insertOutput(string s) {
+            txbOutput.Paste(s);
+        }
+
         private void Main_Load(object sender, EventArgs e)
         {
 
@@ -112,7 +116,7 @@ namespace ThaiIMEBasic
             var idx = lbCandidates.SelectedIndex;
             if (idx >= 0)
             {
-                appendOutput(resultList[idx]);
+                insertOutput(resultList[idx]);
                 clearInput();
             }
         }
@@ -131,6 +135,7 @@ namespace ThaiIMEBasic
         private void txbInput_KeyDown(object sender, KeyEventArgs e)
         {
             int idx;
+            //updateLblPos();
 
             switch (e.KeyCode) {
                 case Keys.Space:
@@ -165,7 +170,7 @@ namespace ThaiIMEBasic
                     if (idx < resultList.Count)
                     {
                         //appendOutput(result[k - Keys.D1]);
-                        appendOutput(resultList[idx]);
+                        insertOutput(resultList[idx]);
                         clearInput();
                         skipNext = true;
                     }
@@ -173,5 +178,19 @@ namespace ThaiIMEBasic
                     break;
             }
         }
+
+        //void updateLblPos() {
+        //    lblPos.Text = $"Selection start: { txbOutput.SelectionStart }, length: { txbOutput.SelectionLength }";
+        //}
+
+        //private void txbOutput_TextChanged(object sender, EventArgs e)
+        //{
+        //    updateLblPos();
+        //}
+
+        //private void txbOutput_MouseClick(object sender, MouseEventArgs e)
+        //{
+        //    updateLblPos();
+        //}
     }
 }
